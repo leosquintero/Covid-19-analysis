@@ -1,0 +1,66 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+ 
+
+```{r}
+head(data)
+```
+```{r} 
+dim(data)
+```
+
+#### taking a look at the structure
+```{r}
+str(data)
+```
+
+#### taking a look at the summary
+```{r}
+summary(data)
+```
+
+#### Counting missing data
+```{r}
+sum(is.na(data))
+```
+
+#### Cases vs Deaths worldwide
+```{r}
+
+data %>% summarize(deaths = sum(deaths), Cases = sum(cases))
+```
+
+## Exploratory Data Visualization ####
+```{r}
+# cases worldwide
+data %>%  group_by(Country, dateRep) %>% 
+    summarize(deaths = sum(deaths), cases = sum(cases)) %>% 
+    ggplot(aes(dateRep, cases, colour = deaths))+
+    geom_jitter() +
+    geom_smooth(method = "lm")+
+    labs(title = "Cases by Date Worldwide",
+                       subtitle = "2020", x = "Month")
+```
+
+
+```{r}
+# Deaths worldwide
+ggplot(data, aes(x = dateRep, y = deaths)) +
+    geom_jitter(stat = "identity", fill = "blue") +
+    labs(title = "Deaths by Date Worldwide",
+         subtitle = "2020", x = "Month")
+```
+
+```{r}
+# Cases worldwide geom_line
+data %>% filter(deaths > 3) %>% 
+    group_by(dateRep) %>% 
+    summarize(cases  = sum(cases)) %>% 
+    ggplot(aes(dateRep, cases))+
+    geom_line()+
+    labs(title = "Cases by Date Worldwide with geom_line",
+         subtitle = "2020", x = "Month")
+```
+
