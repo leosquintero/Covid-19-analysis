@@ -1,8 +1,9 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Covid-19 analysis"
+author: "Leonardo Quintero"
 ---
  
+# Exploratory data Analysis ####
 
 ```{r}
 head(data)
@@ -174,6 +175,22 @@ ggplot(melted_c, aes(series_c, value_c)) +
          subtitle =  "2020", x = "Country", y = "Cases")
 ```
 
+
+#### Boxplot cases by country
+```{r}
+
+data %>%
+    filter(Country %in% c("Italy", "Spain", "China","United_States_of_America")) %>%
+    ggplot(aes(x=Country,y=cases, fill = Country)) +
+    geom_boxplot() + 
+    facet_wrap(~month, ncol= 4) + theme(
+        axis.text.x = element_text(angle=90, size=5  ),
+        axis.title.y = element_text(color="cadetblue" , vjust=0.35) )
+```
+
+
+
+
 ```{r}
 
 # Deaths by country and comparision
@@ -207,5 +224,17 @@ ggplot(melted, aes(series, value)) +
     geom_col()+
     labs(title = "Deaths by country compared", 
          subtitle =  "2020", x = "Country", y = "Deaths")
+```
+
+#### Boxplot deaths by country compared
+
+```{r}
+data %>%
+    filter(Country %in% c("Italy", "Spain", "China","United_States_of_America")) %>%
+    ggplot(aes(x=Country,y=deaths, fill = Country)) +
+    geom_boxplot() + 
+    facet_wrap(~month, ncol= 4) + theme(
+        axis.text.x = element_text(angle=90, size=5  ),
+        axis.title.y = element_text(color="cadetblue" , vjust=0.35) )
 ```
 
