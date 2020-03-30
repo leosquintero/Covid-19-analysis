@@ -6,7 +6,6 @@ library(car)
 library(forecast) 
 library(reshape2)
 library(cowplot)
-theme_set(theme_bw())
 library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -14,7 +13,10 @@ library(maps)
 library(googleway)
 library(ggrepel)
 library(ggspatial)
-library()
+library(corrplot)
+library(tidyr)
+library(tidyverse)
+library(broom)
 
 #create the URL where the dataset is stored with automatic updates every day
 
@@ -109,7 +111,10 @@ ggplot(data, aes(x = dateRep, y = cases)) +
     labs(title = "Cases by Date",
          subtitle = "2020", x = "Country")
 
-
+# March growth
+plot(data$dateRep[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], 
+     data$cases[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], las = 1,
+     xlab = "March", ylab = "")
 
 #Cases by country ####
 
@@ -203,4 +208,60 @@ ggplot(melted, aes(series, value)) +
     geom_col()+
     labs(title = "Deaths by country compared", 
          subtitle =  "2020", x = "Country", y = "Deaths")
+
+
+# Linear regression ####
+
+c1 <- data %>% select("deaths", "cases", "dateRep")
+corrplot(cor(c1), method = 'number', tl.col = "blue" )
+
+
+data %>%
+    filter(Country %in% c("Italy", "Spain", "China","United_States_of_America")) %>%
+    ggplot(aes(x=Country,y=deaths, fill = Country)) +
+    geom_boxplot() + 
+    facet_wrap(~month, ncol= 4) + theme(
+        axis.text.x = element_text(angle=90, size=5  ),
+        axis.title.y = element_text(color="cadetblue" , vjust=0.35) )
+
+
+
+
+
+# calculating percentage of cases from population
+
+data %>%  transmute(Country, geoId, cases / popData2018 * 100) %>% 
+    filter(Country %in% c("Italy", "Spain", "China","United_States_of_America")) %>% 
+    summarize(Cases = sum(cases))
+
+
+
+# Making predictions
+train <- sample(1:nrow(data), 0.8 * nrow(data))
+test <- setdiff(1:nrow(data), train)
+
+x_train <- data[train, -10]
+y_train <- data[train, "cases"]
+
+X_test <- data[test, -10]
+y_test <- data[test, "cases"]
+
+p <- predict(test)
+
+plot(p)
+
+lm(cases ~ deaths, data)
+
+lm(cases ~ ., data)
+
+
+
+
+
+
+
+
+
+
+
 

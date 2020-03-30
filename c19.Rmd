@@ -1,6 +1,9 @@
 ---
 title: "Covid-19 analysis"
 author: "Leonardo Quintero"
+output:
+  html_document:
+    df_print: paged
 ---
  
 # Exploratory data Analysis ####
@@ -73,6 +76,17 @@ ggplot(data, aes(x = dateRep, y = cases)) +
     labs(title = "Cases by Date",
          subtitle = "2020", x = "Month")
 ```
+
+```{r}
+# March
+
+plot(data$dateRep[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], 
+     data$cases[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], las = 1,
+     xlab = "March", ylab = "")
+```
+
+
+
 
 ```{r}
 
