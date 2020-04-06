@@ -1,0 +1,12 @@
+name: covid19app
+title: covid19app
+username:
+account: leonardoquintero
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2062467
+bundleId: 2975876
+url: https://leonardoquintero.shinyapps.io/covid19app/
+when: 1586182195.07018
+asMultiple: FALSE
+asStatic: FALSE

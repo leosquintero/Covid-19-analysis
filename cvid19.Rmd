@@ -2,7 +2,7 @@
 title: "Covid-19 analysis"
 author: "Leonardo Quintero"
 ---
-
+ 
 # Exploratory data Analysis ####
 
 ```{r}
@@ -11,17 +11,18 @@ head(data)
 ```{r} 
 dim(data)
 ```
-```{r}
-summary(data)
-
-```
 
 #### taking a look at the structure
 ```{r}
 str(data)
 ```
 
+#### taking a look at the summary
+```{r}
+Sumary <- summary(data)
 
+print(Sumary)
+```
 
 #### Counting missing data
 ```{r}
@@ -32,7 +33,6 @@ sum(is.na(data))
 ```{r}
 
 data %>% summarize(deaths = sum(deaths), Cases = sum(cases))
-print(caseswd)
 ```
 
 ## Exploratory Data Visualization ####
@@ -250,4 +250,3 @@ data %>%
         axis.text.x = element_text(angle=90, size=5  ),
         axis.title.y = element_text(color="cadetblue" , vjust=0.35) )
 ```
-

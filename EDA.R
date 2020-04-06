@@ -17,6 +17,8 @@ library(corrplot)
 library(tidyr)
 library(tidyverse)
 library(broom)
+require(mosaic)
+require(oilabs)
 
 #create the URL where the dataset is stored with automatic updates every day
 
@@ -58,6 +60,16 @@ data %>% summarize(deaths = sum(deaths), Cases = sum(cases))
 
 # Exploratory Data Visualization ####
 
+#list of countries
+
+country_list <- data %>%  
+    group_by(Country) %>% 
+    transmute()
+
+# grouped by country
+countries <- data %>%  dplyr::group_by(Country) %>% 
+                summarize(deaths = sum(deaths), cases = sum(cases))
+
 # cases worldwide
 data %>%  group_by(Country, dateRep) %>% 
     summarize(deaths = sum(deaths), cases = sum(cases)) %>% 
@@ -93,8 +105,8 @@ data %>%
     coord_flip() +
     labs(title = "Deaths by country > 50",
          subtitle = "2020", x = "Country")
-                  
-# Visualizing cases by country > 50
+                 
+# Visualizing cases by country > 1000
 data %>%
     filter(cases > 1000) %>%
     mutate(Country = reorder(Country, cases)) %>%
@@ -115,6 +127,11 @@ ggplot(data, aes(x = dateRep, y = cases)) +
 plot(data$dateRep[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], 
      data$cases[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], las = 1,
      xlab = "March", ylab = "")
+
+# April growth
+plot(data$dateRep[data$dateRep > strptime("2020-03-30", format = "%y%y-%m-%d")], 
+     data$cases[data$dateRep > strptime("2020-03-30", format = "%y%y-%m-%d")], las = 1,
+     xlab = "April", ylab = "")
 
 #Cases by country ####
 
@@ -254,14 +271,13 @@ lm(cases ~ deaths, data)
 
 lm(cases ~ ., data)
 
+skewness(data$cases)
+qqnorm(data$cases)
+qqline(data$cases)
 
 
 
+ggplot(data, aes(cases)) +
+    geom_()
 
-
-
-
-
-
-
-
+write.csv(data, "data.csv", row.names = F)
