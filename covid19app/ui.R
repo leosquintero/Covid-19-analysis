@@ -113,6 +113,7 @@ shinyUI(
                             tabPanel("Spain", titlePanel("Cases in Spain"), plotOutput("EScases"), 
                             tabPanel("Deaths in Spain", titlePanel("Deaths in Spain"), plotOutput("ESdeaths"))), 
                             tabPanel("China", titlePanel("Cases in China"), plotOutput("CNcases"),
-                            tabPanel("Deaths in China", titlePanel("Deaths in China"), plotOutput("CNdeaths")))
+                            tabPanel("Deaths in China", titlePanel("Deaths in China"), plotOutput("CNdeaths"))),
+                            tabPanel("Dynamic chart", titlePanel("Dynamic Chart"), imageOutput("cv19"))
                             ))))
                 ))))

@@ -217,8 +217,10 @@ shinyServer(function(input, output) {
     
     # Dynamic chart
     output$cv19 <- renderImage({
-        covid19chart.gif
-    })   
-    
+        outfile <- tempfile(fileext='.gif')
+        list(src = "covid19chart.gif",
+             contentType = 'image/gif')
+        
+    })
     
 })

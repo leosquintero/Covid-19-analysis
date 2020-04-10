@@ -18,7 +18,7 @@ library(corrplot)
 library(tidyr)
 library(tidyverse)
 library(broom)
-
+library(caTools)
 
 
 #create the URL where the dataset is stored with automatic updates every day
@@ -98,5 +98,4 @@ dat <- dat %>% mutate(rate_deaths_per_100k_people = (dat$deaths/dat$popData2018)
 # Rounding rate_deaths
 dat["rate_deaths_per_100k_people"] <- round(dat["rate_deaths_per_100k_people"], digits = 4)
 
-
-
+gif <- read.gif("covid19chart.gif", frame = 1)
