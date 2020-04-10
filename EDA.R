@@ -17,8 +17,7 @@ library(corrplot)
 library(tidyr)
 library(tidyverse)
 library(broom)
-require(mosaic)
-require(oilabs)
+library(scales)
 
 #create the URL where the dataset is stored with automatic updates every day
 
@@ -219,9 +218,9 @@ ggplot(melted, aes(dateRep, value, colour = series))+
     labs(title = "Comparing deaths growth in US, IT, CN and ES", 
          subtitle = "2020", y = "deaths")
 
-
+library(ggplotly)
 # Deaths by country compared
-ggplot(melted, aes(series, value)) +
+ggplotly(melted, aes(series, value)) +
     geom_col()+
     labs(title = "Deaths by country compared", 
          subtitle =  "2020", x = "Country", y = "Deaths")
@@ -276,8 +275,95 @@ qqnorm(data$cases)
 qqline(data$cases)
 
 
+# calculating the rate of cases and cases per million on inhabitants
+pop <- data %>% distinct(Country, popData2018)
 
-ggplot(data, aes(cases)) +
-    geom_()
+
+cas_dea <- data %>% group_by(Country) %>% 
+                summarize(cases = sum(cases), deaths = sum(deaths))
+
+dat <- left_join(cas_dea, pop)
+
+dat <- dat %>% mutate(rate_cases = (dat$cases/ dat$popData2018)*100000)
+
+#dounding rate_cases
+dat["rate_cases"] <- round(dat["rate_cases"], digits = 4)
+
+# calculating the rate of deaths and cases per million on inhabitants
+dat <- dat %>% mutate(rate_deaths = (dat$deaths/dat$popData2018)*100000)
+
+# Rounding rate_deaths
+dat["rate_deaths"] <- round(dat["rate_deaths"], digits = 4)
 
 write.csv(data, "data.csv", row.names = F)
+
+
+
+
+
+
+# Dynamic barchart ####
+library(gganimate)
+library(gifski)
+
+
+#select required columns
+
+countr <- data %>% select(Country)
+date <- data %>% select(dateRep)
+geoid <- data %>% select(geoId)
+case <- data %>% select(cases)
+death <- data %>% select(deaths)
+
+cases_tidy <- bind_cols(countr, date, geoid, case)
+
+graph <- cases_tidy %>%
+    group_by(dateRep) %>%
+    # The * 1 makes it possible to have non-integer ranks while sliding
+    mutate(rank = rank(-cases))%>%
+    group_by(Country) %>% 
+    filter(rank <=10) %>%
+    ungroup()
+
+
+
+
+
+staticplot = ggplot(graph, aes(rank, group = Country, 
+                               fill = as.factor(Country), color = as.factor(Country))) +
+    geom_tile(aes(y = cases/2,
+                  height = cases,
+                  width = 0.9), alpha = 0.8, color = NA) +
+    geom_text(aes(y = 0, label = paste(Country, " ")), vjust = 0.2, hjust = 1) +
+    geom_text(aes(y=cases,label = cases, hjust=0)) +
+    coord_flip(clip = "off", expand = FALSE) +
+    scale_y_continuous(labels = scales::comma) +
+    scale_x_reverse() +
+    guides(color = FALSE, fill = FALSE)+
+    theme(axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          panel.grid.major.x = element_line( size=.1, color="grey" ),
+          panel.grid.minor.x = element_line( size=.1, color="grey" ),
+          plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
+          plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+          plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
+          plot.background=element_blank(),
+          plot.margin = margin(2,2, 2, 4, "cm"))
+
+anim = staticplot + transition_states(dateRep, transition_length = 4, state_length = 1) +
+    view_follow(fixed_x = TRUE)  +
+    labs(title = 'Cases per day',  
+         subtitle  =  "2020",
+         caption  = "Data source European Centre for Disease Prevention and Control")
+
+animate(anim, 300, fps = 4,  width = 800, height = 600, 
+        renderer = gifski_renderer("covid19chart.gif"))

@@ -9,28 +9,24 @@
 
 
 library(DT)
-library(googleVis)
 library(dplyr)
 library(ggplot2)
+
 
 # Body ####
 shinyServer(function(input, output) {
     
     # Data table with selected country
-    output$countries <- renderTable({
-        countries %>% filter(Country %in% input$countries)
+    output$dat <- renderTable({
+        dat %>% dplyr::filter(Country %in% input$dat)
         
     })
     # Showing raw data
-    output$total_cases <-  renderDataTable({
+    output$total_cases <-  DT::renderDataTable({
         data
     })
     
-    output$summa <- renderTable({
-        
-        summary(data)
-    })
-    
+    # Country vs date worldwide
     output$worldwide <- renderPlot({
         data %>%  group_by(Country, dateRep) %>% 
             summarize(deaths = sum(deaths), cases = sum(cases)) %>% 
@@ -41,6 +37,7 @@ shinyServer(function(input, output) {
                  subtitle = "2020", x = "Month")
     })
     
+    #count of worldwide deaths
     output$deaths_worldwide <- renderPlot({
         data %>% 
         ggplot(aes(x = dateRep, y = deaths, colour = cases)) +
@@ -49,19 +46,20 @@ shinyServer(function(input, output) {
                  subtitle = "2020", x = "Month")
     })
     
+    # Deaths and cases compared with lines
     output$worldwide_cases <- renderPlot({
-        data %>% filter(deaths > 3) %>% 
-            group_by(dateRep) %>% 
-            summarize(cases  = sum(cases)) %>% 
-            ggplot(aes(dateRep, cases))+
-            geom_line()+
-            labs(title = "Cases by Date Worldwide with line",
+        data %>% dplyr::filter(deaths > 3) %>% 
+            ggplot(aes(dateRep, colour = variable))+
+            geom_line(aes(y = cases, colour = "cases"))+
+            geom_line(aes(y = deaths, colour = "deaths"))+
+            labs(title = "Cases vs deaths Worldwide compared",
                  subtitle = "2020", x = "Month")
     })
     
+    # Deaths by country
     output$deaths_by_country <- renderPlot({
         data %>%
-            filter(deaths > 50) %>%
+            dplyr::filter(deaths > 50) %>%
             mutate(Country = reorder(Country, cases)) %>%
             ggplot(aes(Country, deaths)) +
             geom_col() +
@@ -74,8 +72,8 @@ shinyServer(function(input, output) {
     # Visualizing cases by country > 1000
     output$cases_by_country <- renderPlot({
         data %>%
-            filter(cases > 1000) %>%
-            mutate(Country = reorder(Country, cases)) %>%
+            dplyr::filter(cases > 1000) %>%
+            dplyr::mutate(Country = reorder(Country, cases)) %>%
             ggplot(aes(Country, cases)) +
             geom_col() +
             xlab(NULL) +
@@ -84,6 +82,8 @@ shinyServer(function(input, output) {
                  subtitle = "2020", x = "Country")
     })
     
+    
+    # March growth
     output$march <- renderPlot({
         # March growth
         plot(data$dateRep[data$dateRep > strptime("2020-02-29", format = "%y%y-%m-%d")], 
@@ -116,7 +116,7 @@ shinyServer(function(input, output) {
     
     # cases in the united states
     output$UScases <- renderPlot({
-        data %>% filter(geoId == "US") %>% 
+        data %>% dplyr::filter(geoId == "US") %>% 
             ggplot(aes(dateRep, cases, colour = deaths)) +
             geom_point() +
             geom_smooth()+
@@ -129,7 +129,7 @@ shinyServer(function(input, output) {
     
     # cases in the united states
     output$USdeaths <- renderPlot({
-        data %>% filter(geoId == "US") %>% 
+        data %>% dplyr::filter(geoId == "US") %>% 
             ggplot(aes(dateRep, deaths, colour = cases)) +
             geom_point() +
             geom_smooth()+
@@ -140,7 +140,7 @@ shinyServer(function(input, output) {
     # Cases in Italy
     
     output$ITcases <- renderPlot({
-    data %>% filter(geoId == "IT") %>% 
+    data %>% dplyr::filter(geoId == "IT") %>% 
         ggplot(aes(dateRep, cases, colour = deaths)) +
         geom_point() +
         geom_smooth()+
@@ -151,7 +151,7 @@ shinyServer(function(input, output) {
     
     # Deaths in Italy
     output$ITdeaths <- renderPlot({
-        data %>% filter(geoId == "IT") %>% 
+        data %>% dplyr::filter(geoId == "IT") %>% 
             ggplot(aes(dateRep, deaths, colour = cases)) +
             geom_point() +
             geom_smooth()+
@@ -163,7 +163,7 @@ shinyServer(function(input, output) {
     # Cases in Spain
     
     output$EScases <- renderPlot({
-        data %>% filter(geoId == "ES") %>% 
+        data %>% dplyr::filter(geoId == "ES") %>% 
             ggplot(aes(dateRep, cases, colour = deaths)) +
             geom_point() +
             geom_smooth()+
@@ -172,8 +172,9 @@ shinyServer(function(input, output) {
     
     })
     
+    # deaths in Spain
     output$ESdeaths <- renderPlot({
-        data %>% filter(geoId == "ES") %>% 
+        data %>% dplyr::filter(geoId == "ES") %>% 
             ggplot(aes(dateRep, deaths, colour = cases)) +
             geom_point() +
             geom_smooth()+
@@ -183,9 +184,8 @@ shinyServer(function(input, output) {
     
     
     # Cases in China
-    
     output$CNcases <- renderPlot({
-    data %>% filter(geoId == "CN") %>% 
+    data %>% dplyr::filter(geoId == "CN") %>% 
         ggplot(aes(dateRep, cases, colour = deaths)) +
         geom_point() +
         geom_smooth() +
@@ -194,9 +194,8 @@ shinyServer(function(input, output) {
     })
     
     # Cases in China
-    
     output$CNdeaths <- renderPlot({
-        data %>% filter(geoId == "CN") %>% 
+        data %>% dplyr::filter(geoId == "CN") %>% 
             ggplot(aes(dateRep, deaths, colour = cases)) +
             geom_point() +
             geom_smooth() +
@@ -204,26 +203,22 @@ shinyServer(function(input, output) {
                  subtitle = "2020")
     })
     
+    # Cases by country dropdown
     output$plots <- renderPlot({
-        data %>% filter(Country %in% input$select) %>% 
-            ggplot(aes(x = dateRep, y = cases))+
-            geom_point()+
-            geom_smooth(se = F)+
-            labs(title = "cases by country", subtitle = "2020", 
-                 x = "Date", y = "Cases")
+        data %>% dplyr::filter(Country %in% input$select) %>% 
+            ggplot( aes(dateRep, cases)) +
+            geom_line(aes(y = cases, colour = "cases"))+
+            geom_line(aes(y = deaths, colour = "deaths"))+
+            labs(title = "Cases and deaths by country compared", subtitle = "2020", 
+                 x = "Date", y = "Count")
         
         
     })
     
-    output$plotsd <- renderPlot({
-        data %>% filter(Country %in% input$select) %>% 
-            ggplot(aes(x = dateRep, y = deaths))+
-            geom_point()+
-            geom_smooth(se = F)+
-            labs(title = "cases by country", subtitle = "2020", 
-                 x = "Date", y = "Deaths")
-    })
-    
+    # Dynamic chart
+    output$cv19 <- renderImage({
+        covid19chart.gif
+    })   
     
     
 })
