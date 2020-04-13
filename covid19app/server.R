@@ -13,6 +13,7 @@ library(dplyr)
 library(ggplot2)
 
 
+
 # Body ####
 shinyServer(function(input, output) {
     
@@ -26,25 +27,34 @@ shinyServer(function(input, output) {
         data
     })
     
+    # calculating total cases
+    output$cases <- renderTable({
+        data %>% summarize(Cases = sum(cases))
+    })
+    
+    # Calculating total deaths
+    output$deaths <- renderTable({
+        data %>% summarize(Deaths = sum(deaths))
+    })
+    
+    
     # Country vs date worldwide
-    output$worldwide <- renderPlot({
-        data %>%  group_by(Country, dateRep) %>% 
-            summarize(deaths = sum(deaths), cases = sum(cases)) %>% 
-            ggplot(aes(dateRep, cases, colour = deaths))+
-            geom_jitter() +
-            geom_smooth(method = "lm")+
-            labs(title = "Cases by Date Worldwide",
-                 subtitle = "2020", x = "Month")
+    output$worldwide <- renderPlotly({
+        g <- plot_ly(data, x = ~dateRep, y = ~cases)
+        g <- f %>% layout(title = "Cases by Date Worldwide", 
+                          xaxis = list(title = "Date"),
+                          yaxis = list(title = "Cases"))
     })
     
     #count of worldwide deaths
-    output$deaths_worldwide <- renderPlot({
-        data %>% 
-        ggplot(aes(x = dateRep, y = deaths, colour = cases)) +
-            geom_jitter(stat = "identity", fill = "blue") +
-            labs(title = "Deaths by Date Worldwide",
-                 subtitle = "2020", x = "Month")
-    })
+    output$deaths_worldwide <- renderPlotly({
+        f <- plot_ly(data, x = ~dateRep, y = ~deaths)
+        f <- f %>% layout(title = "Deaths by Date Worldwide", 
+                          xaxis = list(title = "Date"),
+                          yaxis = list(title = "Deaths"))
+        
+        })
+   
     
     # Deaths and cases compared with lines
     output$worldwide_cases <- renderPlot({

@@ -88,8 +88,14 @@ shinyUI(
                 tabItem(tabName = "Charts", 
                     fluidPage(mainPanel(width = 12, 
                         tabsetPanel(
-                            tabPanel("Worldwide", titlePanel("Cases Worldwide"), plotOutput("worldwide"),
-                            tabPanel("Deaths worldwide", titlePanel("Deaths Worldwide"), plotOutput("deaths_worldwide"), 
+                            tabPanel("Numbers", titlePanel("Total number worldwide"), 
+                                    splitLayout(style = "border: 1px solid silver;", cellWidths = c("50%", "50%"), cellArgs = list(style = "padding: 6px"),
+                                        box(width = 12, align = "center",
+                                        h1(tableOutput(outputId = "cases"))) , 
+                                        box(width = 12, align = "center",
+                                        h1(tableOutput(outputId = "deaths"))))),
+                            tabPanel("Worldwide", titlePanel("Cases Worldwide"), plotlyOutput("worldwide"),
+                            tabPanel("Deaths worldwide", titlePanel("Deaths Worldwide"), plotlyOutput("deaths_worldwide"), 
                             tabPanel("Cases vs Deaths", titlePanel("Cases vs Deaths"), plotOutput("worldwide_cases")))), 
                             tabPanel("Cases and Deaths by country", titlePanel("Cases by country"), plotOutput("cases_by_country"), 
                             tabPanel("Deaths by country", titlePanel("Deaths by country"), plotOutput("deaths_by_country"))))

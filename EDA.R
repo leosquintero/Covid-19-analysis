@@ -367,3 +367,19 @@ anim = staticplot + transition_states(dateRep, transition_length = 4, state_leng
 
 animate(anim, 300, fps = 4,  width = 800, height = 600, 
         renderer = gifski_renderer("covid19chart.gif"))
+
+
+# line plots
+
+by_month <- data %>% group_by(dateRep, Country) %>% 
+                summarise(cases = sum(cases))
+
+ggplot(by_month, aes(dateRep, cases))+
+    geom_col()
+
+
+
+#----------------
+
+ plot_ly(data, x = ~dateRep, y = ~deaths)
+add_markers(f)

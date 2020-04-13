@@ -98,4 +98,6 @@ dat <- dat %>% mutate(rate_deaths_per_100k_people = (dat$deaths/dat$popData2018)
 # Rounding rate_deaths
 dat["rate_deaths_per_100k_people"] <- round(dat["rate_deaths_per_100k_people"], digits = 4)
 
+
+# loading animated gif
 gif <- read.gif("covid19chart.gif", frame = 1)
