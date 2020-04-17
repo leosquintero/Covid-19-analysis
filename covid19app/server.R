@@ -39,22 +39,24 @@ shinyServer(function(input, output) {
     
     
     # Country vs date worldwide
-    output$worldwide <- renderPlotly({
-        g <- plot_ly(data, x = ~dateRep, y = ~cases)
-        g <- f %>% layout(title = "Cases by Date Worldwide", 
-                          xaxis = list(title = "Date"),
-                          yaxis = list(title = "Cases"))
+    output$worldwide <- renderPlot({
+        data %>%  group_by(Country, dateRep) %>% 
+            summarize(deaths = sum(deaths), cases = sum(cases)) %>% 
+            ggplot(aes(dateRep, cases, colour = deaths))+
+            geom_jitter() +
+            geom_smooth(method = "lm")+
+            labs(title = "Cases by Date Worldwide",
+                 subtitle = "2020", x = "Month")
     })
     
     #count of worldwide deaths
-    output$deaths_worldwide <- renderPlotly({
-        f <- plot_ly(data, x = ~dateRep, y = ~deaths)
-        f <- f %>% layout(title = "Deaths by Date Worldwide", 
-                          xaxis = list(title = "Date"),
-                          yaxis = list(title = "Deaths"))
-        
-        })
-   
+    output$deaths_worldwide <- renderPlot({
+        data %>% 
+        ggplot(aes(x = dateRep, y = deaths, colour = cases)) +
+            geom_jitter(stat = "identity", fill = "blue") +
+            labs(title = "Deaths by Date Worldwide",
+                 subtitle = "2020", x = "Month")
+    })
     
     # Deaths and cases compared with lines
     output$worldwide_cases <- renderPlot({
