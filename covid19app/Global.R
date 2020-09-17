@@ -21,17 +21,10 @@ library(broom)
 library(caTools)
 
 
-#create the URL where the dataset is stored with automatic updates every day
-
-url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-",format(Sys.time(), "%Y-%m-%d"), ".xlsx", sep = "")
-
-#download the dataset from the website to a local temporary file
-
-GET(url, authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".xlsx")))
 
 #read the Dataset sheet into “R”
 
-data <- read_excel(tf)
+data <- read.csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", na.strings = "", fileEncoding = "UTF-8-BOM")
 
 # Changing colname
 
@@ -48,7 +41,7 @@ total_cases <- data %>%  dplyr::group_by(Country) %>%
     summarize(cases = sum(cases), deaths = sum(deaths))
 
 
-#  Casesby country and comparision ####
+#  Cases by country compared ####
 US_c <- data %>%  dplyr::filter( geoId == "US") %>% 
     transmute(US_cases = cases, dateRep)
 IT_c <- data %>%  dplyr::filter(geoId == "IT") %>% 
@@ -58,7 +51,7 @@ CN_c <- data %>%  dplyr::filter(geoId == "CN") %>%
 ES_c <- data %>%  dplyr::filter(geoId == "ES") %>% 
     transmute(ES_cases = cases)
 
-cases <- bind_cols(US_c, IT_c, CN_c, ES_c)
+cases <- bind_cols(US_c, IT_c, CN_c)
 
 melted_c <- melt(cases, id.vars = "dateRep", variable.name = "series_c", value.name = "value_c")
 
@@ -72,14 +65,14 @@ CN <- data %>%  filter(geoId == "CN") %>%
 ES <- data %>%  filter(geoId == "ES") %>% 
     transmute(ES_Deaths = deaths)
 
-deaths <- bind_cols(US, IT, CN, ES)
+deaths <- bind_cols(US, IT, CN)
 
 melted <- melt(deaths, id.vars = "dateRep", variable.name = "series")
 
 
 
 # calculating the rate of cases and cases per million on inhabitants ####
-pop <- data %>% distinct(Country, popData2018)
+pop <- data %>% distinct(Country, popData2019)
 
 
 cas_dea <- data %>% group_by(Country) %>% 
@@ -87,13 +80,13 @@ cas_dea <- data %>% group_by(Country) %>%
 
 dat <- left_join(cas_dea, pop)
 
-dat <- dat %>% mutate(rate_cases_per_100k_people= (dat$cases/ dat$popData2018)*100000)
+dat <- dat %>% mutate(rate_cases_per_100k_people= (dat$cases/ dat$popData2019)*100000)
 
 #dounding rate_cases
 dat["rate_cases_per_100k_people"] <- round(dat["rate_cases_per_100k_people"], digits = 4)
 
 # calculating the rate of deaths and cases per million on inhabitants
-dat <- dat %>% mutate(rate_deaths_per_100k_people = (dat$deaths/dat$popData2018)*100000)
+dat <- dat %>% mutate(rate_deaths_per_100k_people = (dat$deaths/dat$popData2019)*100000)
 
 # Rounding rate_deaths
 dat["rate_deaths_per_100k_people"] <- round(dat["rate_deaths_per_100k_people"], digits = 4)
@@ -101,3 +94,4 @@ dat["rate_deaths_per_100k_people"] <- round(dat["rate_deaths_per_100k_people"], 
 
 # loading animated gif
 gif <- read.gif("covid19chart.gif", frame = 1)
+
